@@ -394,31 +394,37 @@ function status(msg) { document.getElementById('status').textContent = msg; }
 
 /* ── EXPOSED GLOBALS ── */
 window.createRoom = async function() {
-  const name = document.getElementById('name-input').value.trim();
-  const rname = document.getElementById('room-input').value.trim() || '우리의 약속';
-  if (!name) { alert('이름을 입력해주세요!'); return; }
+  try {
+    const name = document.getElementById('name-input').value.trim();
+    const rname = document.getElementById('room-input').value.trim() || '우리의 약속';
+    if (!name) { alert('이름을 입력해주세요!'); return; }
 
-  // 방 이름 중복 체크 (인덱스 방식 - 빠름)
-  const nameKey = rname.replace(/[.#$[\]]/g, '_');
-  const nameIndexRef = ref(db, `roomNames/${nameKey}`);
-  const nameSnap = await get(nameIndexRef);
-  if (nameSnap.exists()) {
-    alert(`"${rname}" 방이 이미 존재해요! 다른 이름을 사용해주세요 😅`);
-    return;
+    status('방 만드는 중...');
+
+    const nameKey = rname.replace(/[.#$[\]]/g, '_');
+    const nameIndexRef = ref(db, `roomNames/${nameKey}`);
+    const nameSnap = await get(nameIndexRef);
+    if (nameSnap.exists()) {
+      alert(`"${rname}" 방이 이미 존재해요! 다른 이름을 사용해주세요 😅`);
+      status('');
+      return;
+    }
+
+    myName = name;
+    roomId = uid();
+    myColor = COLORS[0];
+    await set(nameIndexRef, roomId);
+    const roomRef = ref(db, `rooms/${roomId}`);
+    await set(roomRef, {
+      name: rname,
+      createdAt: Date.now(),
+      members: { [myName]: { color: myColor, dates: {} } }
+    });
+    initRoom();
+  } catch(e) {
+    alert('오류 발생: ' + e.message);
+    status('');
   }
-
-  myName = name;
-  roomId = uid();
-  myColor = COLORS[0];
-  // 방 이름 인덱스 먼저 등록
-  await set(nameIndexRef, roomId);
-  const roomRef = ref(db, `rooms/${roomId}`);
-  await set(roomRef, {
-    name: rname,
-    createdAt: Date.now(),
-    members: { [myName]: { color: myColor, dates: {} } }
-  });
-  initRoom();
 };
 
 window.joinRoom = async function() {
