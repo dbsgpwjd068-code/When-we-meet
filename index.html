@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>언제만날까 🗓️</title>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Black+Han+Sans&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --surface: #18181c;
+      --surface2: #222228;
+      --border: #2e2e38;
+      --accent: #c8f060;
+      --accent2: #60f0c8;
+      --text: #f0f0f0;
+      --muted: #888;
+      --danger: #f06060;
+    }
+
+```
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Gowun Dodum', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── HERO ── */
+header {
+  width: 100%;
+  padding: 40px 20px 28px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 120% at 50% -20%, rgba(200,240,96,.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+header h1 {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  letter-spacing: -1px;
+  color: var(--accent);
+  position: relative;
+}
+header p {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: .95rem;
+  position: relative;
+}
+
+/* ── MAIN LAYOUT ── */
+main {
+  width: 100%;
+  max-width: 860px;
+  padding: 28px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+}
+.card-title {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 1.05rem;
+  color: var(--accent);
+  margin-bottom: 16px;
+  letter-spacing: .5px;
+}
+
+/* ── SETUP ── */
+.setup-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.setup-row input {
+  flex: 1;
+  min-width: 160px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 16px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: .95rem;
+  outline: none;
+  transition: border-color .2s;
+}
+.setup-row input:focus { border-color: var(--accent); }
+.setup-row input::placeholder { color: var(--muted); }
+
+button {
+  background: var(--accent);
+  color: #0d0d0f;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 22px;
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: .95rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity .15s, transform .1s;
+}
+button:hover { opacity: .85; }
+button:active { transform: scale(.97); }
+button.secondary {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+button.danger { background: var(--danger); color: #fff; }
+
+/* ── SHARE BANNER ── */
+.share-banner {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+.share-banner.visible { display: flex; }
+.share-url {
+  flex: 1;
+  font-size: .82rem;
+  color: var(--accent2);
+  word-break: break-all;
+}
+.copy-btn {
+  background: var(--surface);
+  color: var(--accent2);
+  border: 1px solid var(--accent2);
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: .82rem;
+  cursor: pointer;
+}
+.copy-btn:hover { background: rgba(96,240,200,.08); }
+
+/* ── CALENDAR ── */
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.cal-month {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 1.15rem;
+  color: var(--text);
+}
+.cal-nav button {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 7px 14px;
+  border-radius: 8px;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+.cal-dow {
+  text-align: center;
+  font-size: .72rem;
+  color: var(--muted);
+  padding: 4px 0 8px;
+  letter-spacing: .5px;
+}
+.cal-dow:first-child { color: #f08080; }
+.cal-dow:last-child { color: #80a0f0; }
+
+.day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  position: relative;
+  transition: background .15s, border-color .15s;
+  font-size: .85rem;
+  user-select: none;
+  gap: 2px;
+}
+.day:hover:not(.empty):not(.past) { border-color: var(--border); background: var(--surface2); }
+.day.empty { cursor: default; }
+.day.past { opacity: .3; cursor: not-allowed; }
+.day.today .day-num { color: var(--accent); font-weight: bold; }
+.day-num { line-height: 1; }
+
+/* heat map */
+.day.heat-1 { background: rgba(200,240,96,.12); }
+.day.heat-2 { background: rgba(200,240,96,.25); }
+.day.heat-3 { background: rgba(200,240,96,.40); }
+.day.heat-4 { background: rgba(200,240,96,.60); }
+.day.heat-5 { background: rgba(200,240,96,.80); border-color: var(--accent); }
+
+/* MY selection ring */
+.day.mine { border-color: var(--accent) !important; }
+
+/* dot row */
+.day-dots {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 36px;
+}
+.dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+}
+
+/* ── MEMBERS ── */
+.members-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.member-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: .85rem;
+}
+.member-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.member-me { border-color: var(--accent); color: var(--accent); }
+
+/* ── BEST DATES ── */
+.best-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.best-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: .9rem;
+}
+.best-count {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+/* ── STATUS ── */
+#status {
+  text-align: center;
+  font-size: .82rem;
+  color: var(--muted);
+  min-height: 20px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 480px) {
+  .day { font-size: .72rem; border-radius: 7px; }
+  .cal-grid { gap: 3px; }
+}
+```
+
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>언제만날까 🗓️</h1>
+  <p>친구들과 가능한 날짜를 공유하고 최적의 날을 찾아봐요</p>
+</header>
+
+<main>
+  <!-- SETUP -->
+  <div class="card" id="setup-card">
+    <div class="card-title">👤 이름 입력 & 방 만들기</div>
+    <div class="setup-row">
+      <input id="name-input" type="text" placeholder="내 이름 (예: 김철수)" maxlength="12"/>
+      <input id="room-input" type="text" placeholder="방 이름 (새로 만들 때)" maxlength="20"/>
+      <button onclick="createRoom()">방 만들기</button>
+      <button class="secondary" onclick="joinRoom()">기존 방 참여</button>
+    </div>
+    <p style="margin-top:10px;font-size:.8rem;color:var(--muted)">이미 링크를 받았다면 이름만 입력하고 <b>기존 방 참여</b>를 누르세요</p>
+  </div>
+
+  <!-- SHARE BANNER -->
+
+  <div class="share-banner" id="share-banner">
+    <span style="color:var(--muted);font-size:.82rem;white-space:nowrap">🔗 공유 링크</span>
+    <span class="share-url" id="share-url"></span>
+    <button class="copy-btn" onclick="copyLink()">복사</button>
+  </div>
+
+  <!-- CALENDAR -->
+
+  <div class="card" id="cal-card" style="display:none">
+    <div class="cal-nav">
+      <button onclick="changeMonth(-1)">◀</button>
+      <span class="cal-month" id="cal-month-label"></span>
+      <button onclick="changeMonth(1)">▶</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <p style="margin-top:14px;font-size:.78rem;color:var(--muted)">날짜를 클릭해서 가능한 날을 선택/해제하세요. 색이 진할수록 더 많은 친구가 가능한 날이에요.</p>
+  </div>
+
+  <!-- MEMBERS -->
+
+  <div class="card" id="members-card" style="display:none">
+    <div class="card-title">👥 참여중인 친구들</div>
+    <div class="members-list" id="members-list"></div>
+  </div>
+
+  <!-- BEST DATES -->
+
+  <div class="card" id="best-card" style="display:none">
+    <div class="card-title">🏆 모두가 가능한 날 TOP 5</div>
+    <div class="best-list" id="best-list"></div>
+  </div>
+
+  <div id="status"></div>
+</main>
+
+<!-- Firebase -->
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDhQWCcC806Cs0SKfxD9Ip4KWimZ0qhCIM",
+  authDomain: "when-we-meet-efb40.firebaseapp.com",
+  databaseURL: "https://when-we-meet-efb40-default-rtdb.firebaseio.com",
+  projectId: "when-we-meet-efb40",
+  storageBucket: "when-we-meet-efb40.firebasestorage.app",
+  messagingSenderId: "863569184436",
+  appId: "1:863569184436:web:0ffb85e7cfab2fce0779e1"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+/* ── STATE ── */
+let myName = '';
+let roomId = '';
+let myColor = '';
+let viewYear, viewMonth;
+let roomData = {};
+
+const COLORS = ['#c8f060','#60f0c8','#f0c860','#f060a8','#60a8f0','#a860f0','#f09060','#60f090'];
+
+/* ── UTILS ── */
+function uid() { return Math.random().toString(36).slice(2,8).toUpperCase(); }
+function today() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function status(msg) { document.getElementById('status').textContent = msg; }
+
+/* ── EXPOSED GLOBALS ── */
+window.createRoom = async function() {
+  const name = document.getElementById('name-input').value.trim();
+  const rname = document.getElementById('room-input').value.trim() || '우리의 약속';
+  if (!name) { alert('이름을 입력해주세요!'); return; }
+  myName = name;
+  roomId = uid();
+  myColor = COLORS[0];
+  const roomRef = ref(db, `rooms/${roomId}`);
+  await set(roomRef, {
+    name: rname,
+    createdAt: Date.now(),
+    members: { [myName]: { color: myColor, dates: {} } }
+  });
+  initRoom();
+};
+
+window.joinRoom = async function() {
+  const name = document.getElementById('name-input').value.trim();
+  if (!name) { alert('이름을 입력해주세요!'); return; }
+  const urlRoom = new URLSearchParams(location.search).get('r');
+  if (!urlRoom) { alert('공유 링크로 접속하거나 방 ID가 필요해요!'); return; }
+  myName = name;
+  roomId = urlRoom;
+  const snap = await get(ref(db, `rooms/${roomId}`));
+  if (!snap.exists()) { alert('방을 찾을 수 없어요.'); return; }
+  const data = snap.val();
+  const members = data.members || {};
+  const usedColors = Object.values(members).map(m => m.color);
+  myColor = COLORS.find(c => !usedColors.includes(c)) || COLORS[Object.keys(members).length % COLORS.length];
+  if (!members[myName]) {
+    await update(ref(db, `rooms/${roomId}/members/${myName}`), { color: myColor, dates: {} });
+  } else {
+    myColor = members[myName].color;
+  }
+  initRoom();
+};
+
+function initRoom() {
+  const d = new Date();
+  viewYear = d.getFullYear();
+  viewMonth = d.getMonth();
+  document.getElementById('setup-card').style.display = 'none';
+  document.getElementById('cal-card').style.display = 'block';
+  document.getElementById('members-card').style.display = 'block';
+  document.getElementById('best-card').style.display = 'block';
+  const shareUrl = `${location.origin}${location.pathname}?r=${roomId}`;
+  document.getElementById('share-url').textContent = shareUrl;
+  document.getElementById('share-banner').classList.add('visible');
+  // Push URL
+  history.replaceState({}, '', `?r=${roomId}`);
+  // Listen realtime
+  onValue(ref(db, `rooms/${roomId}`), snap => {
+    if (!snap.exists()) return;
+    roomData = snap.val();
+    renderCalendar();
+    renderMembers();
+    renderBest();
+  });
+  status('실시간 연결됨 ✅');
+}
+
+/* ── CALENDAR ── */
+window.changeMonth = function(delta) {
+  viewMonth += delta;
+  if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+  if (viewMonth < 0)  { viewMonth = 11; viewYear--; }
+  renderCalendar();
+};
+
+function renderCalendar() {
+  const label = `${viewYear}년 ${viewMonth+1}월`;
+  document.getElementById('cal-month-label').textContent = label;
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+  const dows = ['일','월','화','수','목','금','토'];
+  dows.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-dow'; el.textContent = d;
+    grid.appendChild(el);
+  });
+  const first = new Date(viewYear, viewMonth, 1).getDay();
+  const total = new Date(viewYear, viewMonth+1, 0).getDate();
+  const todayStr = today();
+  const members = roomData.members || {};
+  const myDates = (members[myName]?.dates) || {};
+
+  // Build count map
+  const countMap = {};
+  const whoMap = {};
+  Object.entries(members).forEach(([name, m]) => {
+    Object.keys(m.dates || {}).forEach(dateKey => {
+      if (m.dates[dateKey]) {
+        countMap[dateKey] = (countMap[dateKey] || 0) + 1;
+        if (!whoMap[dateKey]) whoMap[dateKey] = [];
+        whoMap[dateKey].push({ name, color: m.color });
+      }
+    });
+  });
+  const maxCount = Math.max(1, ...Object.values(countMap));
+
+  for (let i = 0; i < first; i++) {
+    const el = document.createElement('div'); el.className = 'day empty';
+    grid.appendChild(el);
+  }
+  for (let d = 1; d <= total; d++) {
+    const dateStr = `${viewYear}-${String(viewMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isPast = dateStr < todayStr;
+    const isToday = dateStr === todayStr;
+    const isMine = !!myDates[dateStr];
+    const count = countMap[dateStr] || 0;
+    const heatLevel = count === 0 ? 0 : Math.ceil((count / maxCount) * 5);
+
+    const el = document.createElement('div');
+    el.className = 'day' + (isPast ? ' past' : '') + (isToday ? ' today' : '') +
+                   (isMine ? ' mine' : '') + (heatLevel ? ` heat-${heatLevel}` : '');
+
+    const numEl = document.createElement('div');
+    numEl.className = 'day-num'; numEl.textContent = d;
+    el.appendChild(numEl);
+
+    if (count > 0) {
+      const dots = document.createElement('div');
+      dots.className = 'day-dots';
+      (whoMap[dateStr] || []).forEach(w => {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        dot.style.background = w.color;
+        dot.title = w.name;
+        dots.appendChild(dot);
+      });
+      el.appendChild(dots);
+    }
+
+    if (!isPast) {
+      el.onclick = () => toggleDate(dateStr);
+    }
+    grid.appendChild(el);
+  }
+}
+
+async function toggleDate(dateStr) {
+  const members = roomData.members || {};
+  const myDates = (members[myName]?.dates) || {};
+  const current = !!myDates[dateStr];
+  await update(ref(db, `rooms/${roomId}/members/${myName}/dates`), { [dateStr]: !current });
+}
+
+/* ── MEMBERS ── */
+function renderMembers() {
+  const list = document.getElementById('members-list');
+  list.innerHTML = '';
+  const members = roomData.members || {};
+  Object.entries(members).forEach(([name, m]) => {
+    const chip = document.createElement('div');
+    chip.className = 'member-chip' + (name === myName ? ' member-me' : '');
+    const dot = document.createElement('div');
+    dot.className = 'member-dot';
+    dot.style.background = m.color;
+    chip.appendChild(dot);
+    const txt = document.createElement('span');
+    txt.textContent = name + (name === myName ? ' (나)' : '');
+    chip.appendChild(txt);
+    list.appendChild(chip);
+  });
+}
+
+/* ── BEST DATES ── */
+function renderBest() {
+  const members = roomData.members || {};
+  const countMap = {};
+  const whoMap = {};
+  Object.entries(members).forEach(([name, m]) => {
+    Object.keys(m.dates || {}).forEach(dateKey => {
+      if (m.dates[dateKey]) {
+        countMap[dateKey] = (countMap[dateKey] || 0) + 1;
+        if (!whoMap[dateKey]) whoMap[dateKey] = [];
+        whoMap[dateKey].push(name);
+      }
+    });
+  });
+  const sorted = Object.entries(countMap)
+    .filter(([,c]) => c > 0)
+    .sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]))
+    .slice(0, 5);
+  const list = document.getElementById('best-list');
+  list.innerHTML = '';
+  if (sorted.length === 0) {
+    list.innerHTML = '<p style="color:var(--muted);font-size:.85rem">아직 아무도 날짜를 선택하지 않았어요</p>';
+    return;
+  }
+  sorted.forEach(([date, count]) => {
+    const [y,m,d] = date.split('-');
+    const dow = ['일','월','화','수','목','금','토'][new Date(date).getDay()];
+    const item = document.createElement('div');
+    item.className = 'best-item';
+    const left = document.createElement('span');
+    left.textContent = `${y}년 ${+m}월 ${+d}일 (${dow})`;
+    const right = document.createElement('span');
+    right.className = 'best-count';
+    right.textContent = `${count}명 가능`;
+    item.appendChild(left);
+    item.appendChild(right);
+    list.appendChild(item);
+  });
+}
+
+/* ── COPY LINK ── */
+window.copyLink = function() {
+  const url = document.getElementById('share-url').textContent;
+  navigator.clipboard.writeText(url).then(() => status('링크 복사 완료! 친구에게 보내세요 🎉'));
+};
+
+/* ── AUTO JOIN if URL has ?r= ── */
+window.addEventListener('load', () => {
+  const urlRoom = new URLSearchParams(location.search).get('r');
+  if (urlRoom) {
+    document.getElementById('room-input').value = urlRoom;
+    document.querySelector('[placeholder="방 이름 (새로 만들 때)"]').style.display = 'none';
+    document.querySelector('button[onclick="createRoom()"]').style.display = 'none';
+    status('링크로 접속했어요! 이름을 입력하고 "기존 방 참여"를 누르세요.');
+  }
+});
+</script>
+
+</body>
+</html>
